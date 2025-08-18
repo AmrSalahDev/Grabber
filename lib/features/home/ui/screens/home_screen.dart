@@ -1,3 +1,5 @@
+import 'package:add_to_cart_animation/add_to_cart_animation.dart';
+import 'package:animated_digit/animated_digit.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:faker/faker.dart' as faker;
 import 'package:flutter/material.dart';
@@ -11,8 +13,99 @@ import 'package:grabber/features/home/data/models/category_model.dart';
 import 'package:grabber/features/home/data/models/product_model.dart';
 import 'package:grabber/features/home/ui/cubit/basket_cubit.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final GlobalKey<CartIconKey> cartKey;
+  late Function(GlobalKey) runAddToCartAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    cartKey = GlobalKey<CartIconKey>();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SystemUIWrapper(
+      navigationBarColor: Colors.white,
+      navigationBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.white,
+      statusBarIconBrightness: Brightness.dark,
+      child: AddToCartAnimation(
+        cartKey: cartKey,
+        height: 30,
+        width: 30,
+        opacity: 0.85,
+        dragAnimation: const DragToCartAnimationOptions(rotation: true),
+        jumpAnimation: const JumpAnimationOptions(),
+        createAddToCartAnimation: (runAddToCartAnimation) {
+          this.runAddToCartAnimation = runAddToCartAnimation;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            toolbarHeight: 70,
+            elevation: 2,
+            shadowColor: Colors.black26,
+            title: _buildAppBarBody(context),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 20),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildCarouseSlider(),
+                    SizedBox(height: context.screenHeight * 0.03),
+                    _buildCategories(context),
+                    SizedBox(height: context.screenHeight * 0.03),
+                    _buildSeeAllFruitsWidget(context),
+                    SizedBox(height: context.screenHeight * 0.03),
+                    _buildProducts(context),
+                    SizedBox(height: context.screenHeight * 0.03),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          bottomNavigationBar: CustomNavigationBar(),
+          floatingActionButton:
+              BlocSelector<BasketCubit, List<ProductModel>, int>(
+                selector: (basket) => basket.length,
+                builder: (context, basketSize) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) =>
+                        ScaleTransition(scale: animation, child: child),
+
+                    child: basketSize == 0
+                        ? const SizedBox.shrink()
+                        : BasketBar(
+                            onBasketTap: () => _showBasket(context),
+                            cartKey: cartKey,
+                          ),
+                  );
+                },
+              ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+        ),
+      ),
+    );
+  }
 
   void _showBasket(BuildContext parentContext) {
     showModalBottomSheet(
@@ -24,6 +117,7 @@ class HomeScreen extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+
       builder: (bottomSheetContext) {
         return BlocProvider.value(
           value: parentContext.read<BasketCubit>(),
@@ -43,9 +137,11 @@ class HomeScreen extends StatelessWidget {
                           itemCount: basket.length,
                           itemBuilder: (context, index) {
                             final product = basket[index];
+                            final GlobalKey imageKey = GlobalKey();
                             return ListTile(
                               contentPadding: const EdgeInsets.all(0),
                               leading: Container(
+                                key: imageKey,
                                 width: 67,
                                 height: 67,
                                 alignment: Alignment.center,
@@ -64,8 +160,9 @@ class HomeScreen extends StatelessWidget {
                               ),
                               subtitle: Text("\$${product.price}"),
                               trailing: _buildAddToBasketButton(
-                                context,
-                                product,
+                                context: context,
+                                product: product,
+                                imageKey: imageKey,
                               ),
                             );
                           },
@@ -124,59 +221,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SystemUIWrapper(
-      navigationBarColor: Colors.white,
-      navigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.white,
-      statusBarIconBrightness: Brightness.dark,
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          toolbarHeight: 70,
-          elevation: 2,
-          shadowColor: Colors.black26,
-          title: _buildAppBarBody(context),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 20),
-            child: SingleChildScrollView(
-              //controller: _scrollController,
-              child: Column(
-                children: [
-                  _buildCarouseSlider(),
-                  SizedBox(height: context.screenHeight * 0.03),
-                  _buildCategories(context),
-                  SizedBox(height: context.screenHeight * 0.03),
-                  _buildSeeAllFruitsWidget(context),
-                  SizedBox(height: context.screenHeight * 0.03),
-                  _buildProducts(context),
-                  SizedBox(height: context.screenHeight * 0.03),
-                ],
-              ),
-            ),
-          ),
-        ),
-        bottomNavigationBar: CustomNavigationBar(),
-        floatingActionButton:
-            BlocSelector<BasketCubit, List<ProductModel>, int>(
-              selector: (basket) => basket.length,
-              builder: (context, basketSize) {
-                if (basketSize == 0) {
-                  return const SizedBox.shrink();
-                }
-                return BasketBar(onBasketTap: () => _showBasket(context));
-              },
-            ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
-    );
-  }
-
   Widget _buildProducts(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
@@ -194,6 +238,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildProductItem(BuildContext context, int index) {
     final product = ProductModel.products[index];
+    final GlobalKey imageKey = GlobalKey();
     final textStyle = TextStyle(
       fontWeight: FontWeight.w500,
       color: AppColors.textColor,
@@ -205,6 +250,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
+              key: imageKey,
               height: 150,
               decoration: BoxDecoration(
                 color: AppColors.productColor,
@@ -260,13 +306,21 @@ class HomeScreen extends StatelessWidget {
         Positioned(
           top: 105,
           right: 10,
-          child: _buildAddToBasketButton(context, product),
+          child: _buildAddToBasketButton(
+            context: context,
+            product: product,
+            imageKey: imageKey,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAddToBasketButton(BuildContext context, ProductModel product) {
+  Widget _buildAddToBasketButton({
+    required BuildContext context,
+    required ProductModel product,
+    required GlobalKey imageKey,
+  }) {
     return BlocBuilder<BasketCubit, List<ProductModel>>(
       builder: (context, basket) {
         final inBasketIndex = basket.indexWhere((p) => p.id == product.id);
@@ -289,8 +343,10 @@ class HomeScreen extends StatelessWidget {
             children: [
               if (inBasket)
                 GestureDetector(
-                  onTap: () =>
-                      context.read<BasketCubit>().removeFromBasket(product),
+                  onTap: () {
+                    context.read<BasketCubit>().removeFromBasket(product);
+                    cartKey.currentState!.runClearCartAnimation();
+                  },
                   child: const Icon(
                     Icons.remove,
                     color: AppColors.black,
@@ -299,18 +355,25 @@ class HomeScreen extends StatelessWidget {
                 ),
               if (inBasket) ...[
                 const SizedBox(width: 8),
-                Text(
-                  '$quantity',
-                  style: TextStyle(
+                AnimatedDigitWidget(
+                  value: quantity,
+                  textStyle: TextStyle(
                     fontSize: context.textScaler.scale(16),
                     fontWeight: FontWeight.w500,
                     color: AppColors.black,
                   ),
                 ),
+
                 const SizedBox(width: 8),
               ],
               GestureDetector(
-                onTap: () => context.read<BasketCubit>().addToBasket(product),
+                onTap: () async {
+                  context.read<BasketCubit>().addToBasket(product);
+                  await runAddToCartAnimation(imageKey);
+                  await cartKey.currentState!.runCartAnimation(
+                    (quantity).toString(),
+                  );
+                },
                 child: const Icon(Icons.add, color: AppColors.black, size: 20),
               ),
             ],
@@ -506,7 +569,12 @@ class HomeScreen extends StatelessWidget {
 
 class BasketBar extends StatefulWidget {
   final VoidCallback onBasketTap;
-  const BasketBar({super.key, required this.onBasketTap});
+  final GlobalKey<CartIconKey> cartKey;
+  const BasketBar({
+    super.key,
+    required this.onBasketTap,
+    required this.cartKey,
+  });
 
   @override
   State<BasketBar> createState() => _BasketBarState();
@@ -617,11 +685,15 @@ class _BasketBarState extends State<BasketBar> {
                     ),
                   ),
                   backgroundColor: AppColors.red,
-                  child: Image.asset(
-                    AppImages.basket,
-                    width: 24,
-                    height: 24,
-                    color: AppColors.white,
+                  child: AddToCartIcon(
+                    key: widget.cartKey,
+                    icon: Image.asset(
+                      AppImages.basket,
+                      width: 24,
+                      height: 24,
+                      color: AppColors.white,
+                    ),
+                    badgeOptions: const BadgeOptions(active: false),
                   ),
                 ),
               ],

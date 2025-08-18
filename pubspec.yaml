@@ -20,6 +20,8 @@ dependencies:
   go_router: ^16.1.0
   carousel_slider: ^5.1.1
   uuid: ^4.5.1
+  add_to_cart_animation: ^2.0.4
+  animated_digit: ^3.3.0
 
 dev_dependencies:
   flutter_test:
