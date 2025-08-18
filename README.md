@@ -16,8 +16,12 @@ Built with clean architecture, state management (Cubit/BLoC), and Material 3 des
 
 ---
 
-## ✨ Features
-
+## ✨ Features  
+- 📦 **Product Catalog** – Browse fresh fruits, vegetables, and groceries.
+- 🛍 **Basket Management** – Add, remove, and update product quantities.  
+- ❤️ **Favorites** – Save frequently purchased products.  
+- 📊 **Responsive UI** – Adaptive design for mobile and tablet screens.  
+- 🚀 **Optimized Performance** – Smooth scrolling and fast loading.  
 
 ---
 
@@ -63,7 +67,6 @@ Below is a list of packages used in this Flutter project along with their versio
 - `flutter_native_splash: ^2.4.6` – Configure a native splash screen  
 
 ---
-
 
 
 ### 🎨 Figma Design
