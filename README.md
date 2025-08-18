@@ -21,7 +21,8 @@ Built with clean architecture, state management (Cubit/BLoC), and Material 3 des
 - 🛍 **Basket Management** – Add, remove, and update product quantities.  
 - ❤️ **Favorites** – Save frequently purchased products.  
 - 📊 **Responsive UI** – Adaptive design for mobile and tablet screens.  
-- 🚀 **Optimized Performance** – Smooth scrolling and fast loading.  
+- 🚀 **Optimized Performance** – Smooth scrolling and fast loading. 
+- 🚚 **Track Order** – Real-time order tracking to follow your delivery status.   
 
 ---
 
