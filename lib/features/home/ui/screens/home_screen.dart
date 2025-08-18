@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:faker/faker.dart' as faker;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grabber/application/widgets/system_ui_wrapper.dart';
 import 'package:grabber/core/constants/app_colors.dart';
 import 'package:grabber/core/constants/app_images.dart';
@@ -8,23 +9,119 @@ import 'package:grabber/core/constants/app_strings.dart';
 import 'package:grabber/core/extensions/context_extensions.dart';
 import 'package:grabber/features/home/data/models/category_model.dart';
 import 'package:grabber/features/home/data/models/product_model.dart';
+import 'package:grabber/features/home/ui/cubit/basket_cubit.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  void _showBasket(BuildContext parentContext) {
+    showModalBottomSheet(
+      context: parentContext,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return BlocProvider.value(
+          value: parentContext.read<BasketCubit>(),
+          child: BlocBuilder<BasketCubit, List<ProductModel>>(
+            builder: (context, basket) {
+              return Container(
+                height: context.screenHeight * 0.7,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (basket.isEmpty) const Text("No products added yet."),
 
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+                    if (basket.isNotEmpty)
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: basket.length,
+                          itemBuilder: (context, index) {
+                            final product = basket[index];
+                            return ListTile(
+                              contentPadding: const EdgeInsets.all(0),
+                              leading: Container(
+                                width: 67,
+                                height: 67,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.productColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Image.asset(product.image, height: 40),
+                              ),
+                              title: Text(
+                                product.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text("\$${product.price}"),
+                              trailing: _buildAddToBasketButton(
+                                context,
+                                product,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green,
+                        minimumSize: const Size.fromHeight(60),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Go to Cart (\$30.99)",
+                            style: TextStyle(
+                              fontSize: context.textScaler.scale(16),
+                              color: AppColors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Badge(
+                            backgroundColor: AppColors.red,
+                            label: Text(
+                              basket.length.toString(),
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: context.textScaler.scale(12),
+                              ),
+                            ),
+                            child: Image.asset(
+                              AppImages.basket,
+                              width: 24,
+                              height: 24,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -48,15 +145,16 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, top: 20),
             child: SingleChildScrollView(
+              //controller: _scrollController,
               child: Column(
                 children: [
                   _buildCarouseSlider(),
                   SizedBox(height: context.screenHeight * 0.03),
-                  _buildCategories(),
+                  _buildCategories(context),
                   SizedBox(height: context.screenHeight * 0.03),
                   _buildSeeAllFruitsWidget(context),
                   SizedBox(height: context.screenHeight * 0.03),
-                  _buildProducts(),
+                  _buildProducts(context),
                   SizedBox(height: context.screenHeight * 0.03),
                 ],
               ),
@@ -64,11 +162,166 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         bottomNavigationBar: CustomNavigationBar(),
+        floatingActionButton:
+            BlocSelector<BasketCubit, List<ProductModel>, int>(
+              selector: (basket) => basket.length,
+              builder: (context, basketSize) {
+                if (basketSize == 0) {
+                  return const SizedBox.shrink();
+                }
+                return BasketBar(onBasketTap: () => _showBasket(context));
+              },
+            ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
   }
 
+  Widget _buildProducts(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: ProductModel.products.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.7,
+      ),
+      itemBuilder: (context, index) => _buildProductItem(context, index),
+    );
+  }
+
+  Widget _buildProductItem(BuildContext context, int index) {
+    final product = ProductModel.products[index];
+    final textStyle = TextStyle(
+      fontWeight: FontWeight.w500,
+      color: AppColors.textColor,
+    );
+
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 150,
+              decoration: BoxDecoration(
+                color: AppColors.productColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Image.asset(
+                product.image,
+                fit: BoxFit.contain,
+                width: double.infinity,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              flex: 1,
+              fit: FlexFit.loose,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: textStyle.copyWith(
+                      fontSize: context.textScaler.scale(16),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: AppColors.yellow, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        product.rate,
+                        style: textStyle.copyWith(
+                          fontSize: context.textScaler.scale(12),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '\$${product.price}',
+                    style: textStyle.copyWith(
+                      fontSize: context.textScaler.scale(14),
+                      color: AppColors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Positioned(
+          top: 105,
+          right: 10,
+          child: _buildAddToBasketButton(context, product),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddToBasketButton(BuildContext context, ProductModel product) {
+    return BlocBuilder<BasketCubit, List<ProductModel>>(
+      builder: (context, basket) {
+        final inBasketIndex = basket.indexWhere((p) => p.id == product.id);
+        final quantity = inBasketIndex == -1
+            ? 0
+            : basket[inBasketIndex].quantity;
+        final inBasket = inBasketIndex != -1;
+
+        return Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: inBasket ? BorderRadius.circular(20) : null,
+            shape: inBasket ? BoxShape.rectangle : BoxShape.circle,
+            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (inBasket)
+                GestureDetector(
+                  onTap: () =>
+                      context.read<BasketCubit>().removeFromBasket(product),
+                  child: const Icon(
+                    Icons.remove,
+                    color: AppColors.black,
+                    size: 20,
+                  ),
+                ),
+              if (inBasket) ...[
+                const SizedBox(width: 8),
+                Text(
+                  '$quantity',
+                  style: TextStyle(
+                    fontSize: context.textScaler.scale(16),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              GestureDetector(
+                onTap: () => context.read<BasketCubit>().addToBasket(product),
+                child: const Icon(Icons.add, color: AppColors.black, size: 20),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSeeAllFruitsWidget(BuildContext context) {
+    debugPrint("Hey there");
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -92,105 +345,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProducts() {
-    return SizedBox(
-      height: 225,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (_, index) => _buildProductItem(index),
-        itemCount: ProductModel.products.length,
-      ),
-    );
-  }
-
-  Widget _buildProductItem(int index) {
-    return Stack(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(right: 15),
-              width: 160,
-              height: 150,
-              decoration: BoxDecoration(
-                color: AppColors.productColor,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Image.asset(
-                ProductModel.products[index].image,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ProductModel.products[index].name,
-                  style: TextStyle(
-                    fontSize: context.textScaler.scale(16),
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textColor,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: AppColors.yellow, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      ProductModel.products[index].rate,
-                      style: TextStyle(
-                        fontSize: context.textScaler.scale(12),
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textColor,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '\$${ProductModel.products[index].price.toString()}',
-                  style: TextStyle(
-                    fontSize: context.textScaler.scale(14),
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.black,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        Positioned(
-          top: 0,
-          right: 20,
-          bottom: -25,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.add, color: AppColors.black, size: 20),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategories() {
+  Widget _buildCategories(BuildContext context) {
     return SizedBox(
       height: 100,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemBuilder: (_, index) => _buildCategoryItem(index),
+        itemBuilder: (_, index) => _buildCategoryItem(context, index),
         itemCount: CategoryModel.categories.length,
       ),
     );
   }
 
-  Widget _buildCategoryItem(int index) {
+  Widget _buildCategoryItem(BuildContext context, int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -198,8 +364,8 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context, constraints) => Container(
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.only(right: 10),
-            width: 70,
-            height: 70,
+            width: context.screenWidth * 0.20,
+            height: context.screenWidth * 0.20,
             decoration: BoxDecoration(
               color: AppColors.categoryColor,
               shape: BoxShape.circle,
@@ -294,7 +460,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   Expanded(
-                    child: Image.asset(AppImages.vegebales, fit: BoxFit.cover),
+                    child: Image.asset(
+                      AppImages.vegebales,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ],
               ),
@@ -331,6 +500,135 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class BasketBar extends StatefulWidget {
+  final VoidCallback onBasketTap;
+  const BasketBar({super.key, required this.onBasketTap});
+
+  @override
+  State<BasketBar> createState() => _BasketBarState();
+}
+
+class _BasketBarState extends State<BasketBar> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: context.read<BasketCubit>(),
+      child: BlocBuilder<BasketCubit, List<ProductModel>>(
+        builder: (context, basket) {
+          return Container(
+            width: double.infinity,
+            height: 70,
+            alignment: Alignment.center,
+            margin: const EdgeInsets.only(left: 16, right: 16),
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            decoration: BoxDecoration(
+              color: AppColors.green,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 7,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    controller: _scrollController,
+                    shrinkWrap: true,
+                    itemCount: basket.length,
+                    itemBuilder: (_, index) {
+                      return Center(
+                        child: Badge(
+                          label: Text(
+                            basket[index].quantity.toString(),
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: context.textScaler.scale(12),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          backgroundColor: AppColors.red,
+                          offset: const Offset(-15, -3),
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.all(5),
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: AppColors.productColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Image.asset(
+                              basket[index].image,
+                              width: 35,
+                              height: 35,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(width: 10),
+                VerticalDivider(
+                  color: AppColors.white,
+                  thickness: 1,
+                  endIndent: 10,
+                  indent: 10,
+                ),
+                GestureDetector(
+                  onTap: () => widget.onBasketTap(),
+                  child: Text(
+                    AppStrings.viewBasket,
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: context.textScaler.scale(16),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Badge(
+                  label: Text(
+                    basket.length.toString(),
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: context.textScaler.scale(12),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor: AppColors.red,
+                  child: Image.asset(
+                    AppImages.basket,
+                    width: 24,
+                    height: 24,
+                    color: AppColors.white,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

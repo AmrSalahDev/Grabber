@@ -11,10 +11,13 @@ class AppStrings {
   static const String vegetables = "Vegetables";
   static const String seeAll = "See all";
   static const String banana = "Banana";
-  static const String apple = "Apple";
+  static const String appleRed = "Apple Red";
+  static const String appleGreen = "Apple Green";
   static const String orange = "Orange";
-  static const String grape = "Grape";
+  static const String pear = "Pear";
   static const String mango = "Mango";
-  static const String strawberry = "Strawberry";
+  static const String blueberries = "Blueberries";
   static const String pepper = "Pepper";
+  static const String guava = "Guava";
+  static const String viewBasket = "View Basket";
 }

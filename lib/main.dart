@@ -30,6 +30,11 @@ class _MyGrabberState extends State<GrabberApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: Colors.white,
+          dragHandleColor: Colors.grey.shade300,
+          dragHandleSize: Size(50, 5),
+        ),
       ),
       routerConfig: AppRouter.router,
     );
