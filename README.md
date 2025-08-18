@@ -34,9 +34,35 @@ flutter run
 
 ---
 
-## 📦 Dependencies Used
+## 📦 Dependencies Used  
 
-Below is a list of the main packages used in this Flutter project:
+Below is a list of packages used in this Flutter project along with their versions:  
+
+### 🚀 Core  
+- `flutter` – Flutter SDK  
+- `cupertino_icons: ^1.0.8` – iOS-style icons  
+
+### 📦 State Management  
+- `flutter_bloc: ^9.1.1` – Bloc/Cubit pattern for managing app state  
+- `equatable: ^2.0.7` – Simplifies equality comparisons  
+
+### 🎨 UI & Animations  
+- `page_transition: ^2.2.1` – Custom page transitions  
+- `go_transitions: ^0.8.2` – Smooth navigation animations  
+- `carousel_slider: ^5.1.1` – Create product/image sliders  
+- `toastification: ^3.0.3` – Beautiful toast notifications  
+
+### 🔄 Routing  
+- `go_router: ^16.1.0` – Declarative navigation & routing  
+
+### ⚡ Utilities & Helpers  
+- `uuid: ^4.5.1` – Generate unique IDs  
+- `faker: ^2.2.0` – Generate fake/dummy data for testing  
+
+### 📱 Native Features  
+- `flutter_native_splash: ^2.4.6` – Configure a native splash screen  
+
+---
 
 
 
