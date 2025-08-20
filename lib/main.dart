@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:go_transitions/go_transitions.dart';
 import 'package:grabber/core/routes/app_router.dart';
 
 void main() async {
@@ -24,6 +25,7 @@ class GrabberApp extends StatefulWidget {
 class _MyGrabberState extends State<GrabberApp> {
   @override
   Widget build(BuildContext context) {
+    GoTransition.defaultCurve = Curves.bounceOut;
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

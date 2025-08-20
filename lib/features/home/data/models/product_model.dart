@@ -43,19 +43,50 @@ class ProductModel extends Equatable {
   @override
   List<Object?> get props => [id];
 
-  static final List<ProductModel> products = [
+  static final List<ProductModel> detergent = [
+    ProductModel(
+      name: AppStrings.purex,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.purex,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.varnish,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.varnish,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.harpic,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.harpic,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.harpic,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.harpic2,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.dettol,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.dettol,
+      id: uuid.v4(),
+    ),
+  ];
+
+  static final List<ProductModel> fruits = [
     ProductModel(
       name: AppStrings.banana,
       rate: '4.5 (255)',
       price: 20.0,
       image: AppImages.banana,
-      id: uuid.v4(),
-    ),
-    ProductModel(
-      name: AppStrings.pepper,
-      rate: '4.5 (255)',
-      price: 20.0,
-      image: AppImages.pepper,
       id: uuid.v4(),
     ),
     ProductModel(

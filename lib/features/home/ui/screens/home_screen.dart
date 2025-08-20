@@ -1,14 +1,16 @@
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
-import 'package:animated_digit/animated_digit.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:faker/faker.dart' as faker;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:grabber/application/widgets/add_and_remove_buttons.dart';
 import 'package:grabber/application/widgets/system_ui_wrapper.dart';
 import 'package:grabber/core/constants/app_colors.dart';
 import 'package:grabber/core/constants/app_images.dart';
 import 'package:grabber/core/constants/app_strings.dart';
 import 'package:grabber/core/extensions/context_extensions.dart';
+import 'package:grabber/core/routes/app_router.dart';
 import 'package:grabber/features/home/data/models/category_model.dart';
 import 'package:grabber/features/home/data/models/product_model.dart';
 import 'package:grabber/features/home/ui/cubit/basket_cubit.dart';
@@ -72,10 +74,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(height: context.screenHeight * 0.03),
                     _buildCategories(context),
                     SizedBox(height: context.screenHeight * 0.03),
-                    _buildSeeAllFruitsWidget(context),
+                    _buildSeeAllWidget(
+                      context: context,
+                      title: AppStrings.fruits,
+                    ),
                     SizedBox(height: context.screenHeight * 0.03),
-                    _buildProducts(context),
+                    _buildProducts(
+                      context: context,
+                      products: ProductModel.fruits,
+                    ),
+
                     SizedBox(height: context.screenHeight * 0.03),
+                    _buildSeeAllWidget(
+                      context: context,
+                      title: AppStrings.detergent,
+                    ),
+                    SizedBox(height: context.screenHeight * 0.03),
+                    _buildProducts(
+                      context: context,
+                      products: ProductModel.detergent,
+                    ),
+                    SizedBox(height: context.screenHeight * 0.15),
                   ],
                 ),
               ),
@@ -159,10 +178,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               subtitle: Text("\$${product.price}"),
-                              trailing: _buildAddToBasketButton(
-                                context: context,
+                              trailing: AddAndRemoveButtons(
                                 product: product,
+                                cartKey: cartKey,
                                 imageKey: imageKey,
+                                runAddToCartAnimation: runAddToCartAnimation,
                               ),
                             );
                           },
@@ -171,7 +191,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        context.push(
+                          AppPaths.cart,
+                          extra: context.read<BasketCubit>(),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.green,
@@ -221,23 +244,31 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProducts(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: ProductModel.products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 0.7,
+  Widget _buildProducts({
+    required BuildContext context,
+    required List<ProductModel> products,
+  }) {
+    return SizedBox(
+      height: context.screenHeight * 0.32,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: products.length,
+        itemBuilder: (context, index) => _buildProductItem(
+          context: context,
+          index: index,
+          products: products,
+        ),
       ),
-      itemBuilder: (context, index) => _buildProductItem(context, index),
     );
   }
 
-  Widget _buildProductItem(BuildContext context, int index) {
-    final product = ProductModel.products[index];
+  Widget _buildProductItem({
+    required BuildContext context,
+    required int index,
+    required List<ProductModel> products,
+  }) {
+    final product = products[index];
     final GlobalKey imageKey = GlobalKey();
     final textStyle = TextStyle(
       fontWeight: FontWeight.w500,
@@ -247,11 +278,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Stack(
       children: [
         Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               key: imageKey,
               height: 150,
+              width: 170,
+              margin: const EdgeInsets.only(right: 10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.productColor,
                 borderRadius: BorderRadius.circular(10),
@@ -263,133 +298,67 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Flexible(
-              flex: 1,
-              fit: FlexFit.loose,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: textStyle.copyWith(
-                      fontSize: context.textScaler.scale(16),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  style: textStyle.copyWith(
+                    fontSize: context.textScaler.scale(16),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: AppColors.yellow, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        product.rate,
-                        style: textStyle.copyWith(
-                          fontSize: context.textScaler.scale(12),
-                        ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.star, color: AppColors.yellow, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      product.rate,
+                      style: textStyle.copyWith(
+                        fontSize: context.textScaler.scale(12),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '\$${product.price}',
-                    style: textStyle.copyWith(
-                      fontSize: context.textScaler.scale(14),
-                      color: AppColors.black,
                     ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '\$${product.price}',
+                  style: textStyle.copyWith(
+                    fontSize: context.textScaler.scale(14),
+                    color: AppColors.black,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
         Positioned(
           top: 105,
-          right: 10,
-          child: _buildAddToBasketButton(
-            context: context,
+          right: 15,
+          child: AddAndRemoveButtons(
             product: product,
+            cartKey: cartKey,
             imageKey: imageKey,
+            runAddToCartAnimation: runAddToCartAnimation,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAddToBasketButton({
+  Widget _buildSeeAllWidget({
     required BuildContext context,
-    required ProductModel product,
-    required GlobalKey imageKey,
+    required String title,
   }) {
-    return BlocBuilder<BasketCubit, List<ProductModel>>(
-      builder: (context, basket) {
-        final inBasketIndex = basket.indexWhere((p) => p.id == product.id);
-        final quantity = inBasketIndex == -1
-            ? 0
-            : basket[inBasketIndex].quantity;
-        final inBasket = inBasketIndex != -1;
-
-        return Container(
-          height: 36,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: inBasket ? BorderRadius.circular(20) : null,
-            shape: inBasket ? BoxShape.rectangle : BoxShape.circle,
-            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (inBasket)
-                GestureDetector(
-                  onTap: () {
-                    context.read<BasketCubit>().removeFromBasket(product);
-                    cartKey.currentState!.runClearCartAnimation();
-                  },
-                  child: const Icon(
-                    Icons.remove,
-                    color: AppColors.black,
-                    size: 20,
-                  ),
-                ),
-              if (inBasket) ...[
-                const SizedBox(width: 8),
-                AnimatedDigitWidget(
-                  value: quantity,
-                  textStyle: TextStyle(
-                    fontSize: context.textScaler.scale(16),
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.black,
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-              ],
-              GestureDetector(
-                onTap: () async {
-                  context.read<BasketCubit>().addToBasket(product);
-                  await runAddToCartAnimation(imageKey);
-                  await cartKey.currentState!.runCartAnimation(
-                    (quantity).toString(),
-                  );
-                },
-                child: const Icon(Icons.add, color: AppColors.black, size: 20),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSeeAllFruitsWidget(BuildContext context) {
-    debugPrint("Hey there");
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          AppStrings.fruits,
+          title,
           style: TextStyle(
             fontSize: context.textScaler.scale(16),
             fontWeight: FontWeight.w500,

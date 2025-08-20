@@ -20,4 +20,13 @@ class AppStrings {
   static const String pepper = "Pepper";
   static const String guava = "Guava";
   static const String viewBasket = "View Basket";
+  static const String checkout = "Checkout";
+  static const String cart = "Cart";
+  static const String orders = "Orders";
+  static const String goToCheckout = 'Go to checkout';
+  static const String purex = 'Purex';
+  static const String varnish = "Varnish";
+  static const String harpic = "Harpic";
+  static const String dettol = "Dettol";
+  static const String detergent = "Detergent";
 }
