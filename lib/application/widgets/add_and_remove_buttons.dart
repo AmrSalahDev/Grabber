@@ -1,7 +1,12 @@
+// 🐦 Flutter imports:
+import 'package:flutter/material.dart';
+
+// 📦 Package imports:
 import 'package:add_to_cart_animation/add_to_cart_icon.dart';
 import 'package:animated_digit/animated_digit.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// 🌎 Project imports:
 import 'package:grabber/core/constants/app_colors.dart';
 import 'package:grabber/core/extensions/context_extensions.dart';
 import 'package:grabber/features/home/data/models/product_model.dart';

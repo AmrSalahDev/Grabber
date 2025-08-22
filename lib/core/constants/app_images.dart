@@ -25,4 +25,23 @@ class AppImages {
   static const String purex = "assets/images/purex.png";
   static const String varnish = "assets/images/varnish.png";
   static const String pawpaw = "assets/images/pawpaw.png";
+  static const String grapes = "assets/images/grapes.png";
+  static const String waterLemon = "assets/images/water_lemon.png";
+  static const String strawberry = "assets/images/strawberry.png";
+  static const String loacker = "assets/images/loacker.png";
+  static const String loacker2 = "assets/images/loacker2.png";
+  static const String biscoff = "assets/images/biscoff.png";
+  static const String tuc = "assets/images/tuc.png";
+  static const String tuc2 = "assets/images/tuc2.png";
+  static const String craditCard = "assets/icons/ic_credit_card.png";
+  static const String confirmed = "assets/icons/ic_confirmed.png";
+  static const String delivered = "assets/icons/ic_delivered.png";
+  static const String packingItems = "assets/icons/ic_packing_items.png";
+  static const String deliveryMotorCycle =
+      "assets/images/delivery_motorcycle.png";
+  static const String user = "assets/images/user.png";
+
+  // json
+  static const String cart = "assets/jsons/cart.json";
+  static const String confirmOrder = "assets/jsons/confirm_order.json";
 }

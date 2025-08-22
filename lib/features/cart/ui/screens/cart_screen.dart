@@ -1,7 +1,12 @@
+// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+
+// 📦 Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
+
+// 🌎 Project imports:
 import 'package:grabber/application/widgets/add_and_remove_buttons.dart';
 import 'package:grabber/core/constants/app_colors.dart';
 import 'package:grabber/core/constants/app_images.dart';
@@ -18,46 +23,21 @@ class CartScreen extends StatefulWidget {
   State<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
-  late AnimationController animationController;
-  late Animation<Offset> _slideAnimation;
-
+class _CartScreenState extends State<CartScreen> {
+  bool _showBottomBar = false;
   @override
   void initState() {
     super.initState();
 
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-
-    _slideAnimation =
-        Tween<Offset>(
-          begin: const Offset(0, 1), // تحت الشاشة
-          end: Offset.zero, // مكانه الطبيعي
-        ).animate(
-          CurvedAnimation(
-            parent: animationController,
-            curve: Curves.fastOutSlowIn,
-          ),
-        );
-
-    // 📌 إيه اللي بتعمله؟
-
-    // دي بتسجّل callback يتنفذ بعد ما Flutter يخلص أول frame (أول عملية رسم للشاشة).
-    // يعني:
-
-    // Flutter يبني الـ widgets → يرسمها على الشاشة.
-    // بعد ما يرسم خالص → ينفذ الكود اللي جوه addPostFrameCallback.
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      animationController.forward();
+      setState(() {
+        _showBottomBar = true;
+      });
     });
   }
 
   @override
   void dispose() {
-    animationController.dispose();
     super.dispose();
   }
 
@@ -203,8 +183,10 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
-      bottomNavigationBar: SlideTransition(
-        position: _slideAnimation,
+      bottomNavigationBar: AnimatedSlide(
+        duration: const Duration(milliseconds: 600),
+        offset: _showBottomBar ? Offset.zero : const Offset(0, 1),
+        curve: Curves.fastOutSlowIn,
         child: _buildBottomBar(),
       ),
     );

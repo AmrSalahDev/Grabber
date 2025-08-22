@@ -1,4 +1,7 @@
+// 📦 Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// 🌎 Project imports:
 import 'package:grabber/features/home/data/models/product_model.dart';
 
 class BasketCubit extends Cubit<List<ProductModel>> {

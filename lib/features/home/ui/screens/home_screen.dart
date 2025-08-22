@@ -1,9 +1,15 @@
+// 🐦 Flutter imports:
+import 'package:flutter/material.dart';
+
+// 📦 Package imports:
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:faker/faker.dart' as faker;
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
+
+// 🌎 Project imports:
 import 'package:grabber/application/widgets/add_and_remove_buttons.dart';
 import 'package:grabber/application/widgets/system_ui_wrapper.dart';
 import 'package:grabber/core/constants/app_colors.dart';
@@ -94,6 +100,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       context: context,
                       products: ProductModel.detergent,
                     ),
+
+                    SizedBox(height: context.screenHeight * 0.03),
+                    _buildSeeAllWidget(
+                      context: context,
+                      title: AppStrings.biscuit,
+                    ),
+                    SizedBox(height: context.screenHeight * 0.03),
+                    _buildProducts(
+                      context: context,
+                      products: ProductModel.biscuit,
+                    ),
+
                     SizedBox(height: context.screenHeight * 0.15),
                   ],
                 ),
@@ -113,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: basketSize == 0
                         ? const SizedBox.shrink()
                         : BasketBar(
-                            onBasketTap: () => _showBasket(context),
+                            onBasketTap: () => _showBasketBottomSheet(context),
                             cartKey: cartKey,
                           ),
                   );
@@ -126,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showBasket(BuildContext parentContext) {
+  void _showBasketBottomSheet(BuildContext parentContext) {
     showModalBottomSheet(
       context: parentContext,
       isScrollControlled: true,
@@ -148,44 +166,62 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (basket.isEmpty) const Text("No products added yet."),
+                    if (basket.isEmpty) SizedBox.shrink(),
 
                     if (basket.isNotEmpty)
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: basket.length,
-                          itemBuilder: (context, index) {
-                            final product = basket[index];
-                            final GlobalKey imageKey = GlobalKey();
-                            return ListTile(
-                              contentPadding: const EdgeInsets.all(0),
-                              leading: Container(
-                                key: imageKey,
-                                width: 67,
-                                height: 67,
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.productColor,
-                                  borderRadius: BorderRadius.circular(10),
+                        child: AnimationLimiter(
+                          child: ListView.builder(
+                            itemCount: basket.length,
+                            physics: const BouncingScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final product = basket[index];
+                              final GlobalKey imageKey = GlobalKey();
+                              return AnimationConfiguration.staggeredList(
+                                position: index,
+                                duration: const Duration(milliseconds: 375),
+                                child: SlideAnimation(
+                                  verticalOffset: 50.0,
+                                  child: FadeInAnimation(
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.all(0),
+                                      leading: Container(
+                                        key: imageKey,
+                                        width: 67,
+                                        height: 67,
+                                        alignment: Alignment.center,
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.productColor,
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          product.image,
+                                          height: 40,
+                                        ),
+                                      ),
+                                      title: Text(
+                                        product.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Text("\$${product.price}"),
+                                      trailing: AddAndRemoveButtons(
+                                        product: product,
+                                        cartKey: cartKey,
+                                        imageKey: imageKey,
+                                        runAddToCartAnimation:
+                                            runAddToCartAnimation,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                child: Image.asset(product.image, height: 40),
-                              ),
-                              title: Text(
-                                product.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              subtitle: Text("\$${product.price}"),
-                              trailing: AddAndRemoveButtons(
-                                product: product,
-                                cartKey: cartKey,
-                                imageKey: imageKey,
-                                runAddToCartAnimation: runAddToCartAnimation,
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     const SizedBox(height: 10),
@@ -709,27 +745,27 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined, color: AppColors.black),
-            label: 'Home',
+            label: AppStrings.home,
             activeIcon: Icon(Icons.home, color: AppColors.green),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite_border_outlined, color: Colors.black),
-            label: 'Favorite',
+            label: AppStrings.favorite,
             activeIcon: Icon(Icons.favorite, color: AppColors.green),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search_rounded, color: Colors.black),
-            label: 'Search',
+            label: AppStrings.search,
             activeIcon: Icon(Icons.search, color: AppColors.green),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_outlined, color: Colors.black),
-            label: 'Profile',
+            label: AppStrings.profile,
             activeIcon: Icon(Icons.person_2, color: AppColors.green),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_rounded, color: Colors.black),
-            label: 'Menu',
+            label: AppStrings.menu,
             activeIcon: Icon(Icons.menu, color: AppColors.green),
           ),
         ],

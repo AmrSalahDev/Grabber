@@ -1,74 +1,18 @@
-import 'package:faker/faker.dart' as faker;
+// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+
+// 📦 Package imports:
+import 'package:faker/faker.dart' as faker;
 import 'package:go_router/go_router.dart';
+
+// 🌎 Project imports:
+import 'package:grabber/application/widgets/custom_tile.dart';
+import 'package:grabber/application/widgets/custom_tile_background.dart';
 import 'package:grabber/core/constants/app_colors.dart';
 import 'package:grabber/core/constants/app_images.dart';
 import 'package:grabber/core/constants/app_strings.dart';
-import 'package:grabber/core/constants/app_styles.dart';
 import 'package:grabber/core/extensions/context_extensions.dart';
 import 'package:grabber/core/routes/app_router.dart';
-
-class CheckoutSection extends StatelessWidget {
-  final String? title;
-  final List<Widget> children;
-
-  const CheckoutSection({super.key, this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        title == null
-            ? const SizedBox.shrink()
-            : Text(
-                title ?? '',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: context.textScaler.scale(16),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-        const SizedBox(height: 20),
-        Container(
-          decoration: AppStyles.boxDecoration,
-          child: Column(children: children),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-}
-
-class CheckoutTile extends StatelessWidget {
-  final Widget leading;
-  final String title;
-  final Widget? trailing;
-
-  const CheckoutTile({
-    super.key,
-    required this.leading,
-    required this.title,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: leading,
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: context.textScaler.scale(16),
-        ),
-      ),
-      trailing:
-          trailing ??
-          const Icon(Icons.arrow_forward_ios, size: 20, color: AppColors.black),
-    );
-  }
-}
 
 class CheckOutScreen extends StatefulWidget {
   const CheckOutScreen({super.key});
@@ -94,9 +38,6 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
   @override
   void dispose() {
-    setState(() {
-      _showBottomBar = false;
-    });
     super.dispose();
   }
 
@@ -130,10 +71,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CheckoutSection(
+              CustomTileBackground(
                 title: "Details",
                 children: [
-                  CheckoutTile(
+                  CustomTile(
                     leading: const Icon(
                       Icons.person_2_outlined,
                       color: AppColors.black,
@@ -141,9 +82,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     title: faker.faker.person.name(),
                   ),
                   Divider(color: AppColors.borderWhite),
-                  CheckoutTile(
+                  CustomTile(
                     leading: const Icon(
-                      Icons.person_2_outlined,
+                      Icons.phone_outlined,
                       color: AppColors.black,
                     ),
                     title:
@@ -151,10 +92,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   ),
                 ],
               ),
-              CheckoutSection(
+              CustomTileBackground(
                 title: "Address",
                 children: [
-                  CheckoutTile(
+                  CustomTile(
                     leading: const Icon(
                       Icons.location_on_outlined,
                       color: AppColors.black,
@@ -163,10 +104,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   ),
                 ],
               ),
-              CheckoutSection(
+              CustomTileBackground(
                 title: "Hava Coupon?",
                 children: [
-                  CheckoutTile(
+                  CustomTile(
                     leading: const Icon(
                       Icons.local_offer_outlined,
                       color: AppColors.black,
@@ -175,10 +116,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   ),
                 ],
               ),
-              CheckoutSection(
+              CustomTileBackground(
                 title: "Delivery",
                 children: [
-                  CheckoutTile(
+                  CustomTile(
                     leading: Image.asset(
                       AppImages.priority,
                       width: 24,
@@ -203,7 +144,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     ),
                   ),
                   Divider(color: AppColors.borderWhite),
-                  CheckoutTile(
+                  CustomTile(
                     leading: Image.asset(
                       AppImages.standard,
                       width: 24,
@@ -216,7 +157,6 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       child: Radio(
                         value: isChecked,
                         groupValue: isChecked,
-                        toggleable: true,
                         onChanged: (value) {
                           setState(() {
                             isChecked = value!;
@@ -229,7 +169,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     ),
                   ),
                   Divider(color: AppColors.borderWhite),
-                  CheckoutTile(
+                  CustomTile(
                     leading: const Icon(
                       Icons.schedule_outlined,
                       color: AppColors.black,
@@ -260,7 +200,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   ],
                 ),
               ),
-              CheckoutSection(
+              CustomTileBackground(
                 children: [
                   ListTile(
                     title: Text(
@@ -394,7 +334,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                 ],
               ),
 
-              CheckoutSection(
+              CustomTileBackground(
                 title: "Payment method",
                 children: [
                   ListTile(
@@ -446,7 +386,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         ),
       ),
       child: ElevatedButton(
-        onPressed: () => context.push(AppPaths.checkout),
+        onPressed: () => context.push(AppPaths.payment),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.green,
           minimumSize: Size(double.infinity, 40),

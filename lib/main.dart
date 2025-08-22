@@ -1,16 +1,20 @@
+// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+
+// 📦 Package imports:
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:go_transitions/go_transitions.dart';
+
+// 🌎 Project imports:
+import 'package:grabber/core/constants/app_colors.dart';
 import 'package:grabber/core/routes/app_router.dart';
+import 'package:grabber/core/services/di/di.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  Future.delayed(
-    const Duration(seconds: 3),
-    () => FlutterNativeSplash.remove(),
-  );
+  setupDependencies();
+  FlutterNativeSplash.remove();
 
   runApp(const GrabberApp());
 }
@@ -25,15 +29,14 @@ class GrabberApp extends StatefulWidget {
 class _MyGrabberState extends State<GrabberApp> {
   @override
   Widget build(BuildContext context) {
-    GoTransition.defaultCurve = Curves.bounceOut;
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        primaryColor: AppColors.green,
         useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.white,
         bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           dragHandleColor: Colors.grey.shade300,
           dragHandleSize: Size(50, 5),
         ),

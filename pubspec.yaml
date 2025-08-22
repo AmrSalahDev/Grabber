@@ -22,6 +22,14 @@ dependencies:
   add_to_cart_animation: ^2.0.4
   animated_digit: ^3.3.0
   flutter_staggered_animations: ^1.1.1
+  credit_card_form: ^1.0.1
+  flutter_map: ^8.2.1
+  latlong2: ^0.9.1
+  flutter_map_animations: ^0.9.0
+  http: ^1.5.0
+  lottie: ^3.3.1
+  get_it: ^8.2.0
+  import_sorter: ^4.6.0
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +42,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/jsons/
     - assets/logo/
 
   # fonts:
@@ -47,3 +56,6 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+
+import_sorter:
+  emojis: true

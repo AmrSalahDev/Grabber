@@ -1,7 +1,10 @@
+// 📦 Package imports:
 import 'package:equatable/equatable.dart';
+import 'package:uuid/uuid.dart';
+
+// 🌎 Project imports:
 import 'package:grabber/core/constants/app_images.dart';
 import 'package:grabber/core/constants/app_strings.dart';
-import 'package:uuid/uuid.dart';
 
 final uuid = Uuid();
 
@@ -42,6 +45,44 @@ class ProductModel extends Equatable {
 
   @override
   List<Object?> get props => [id];
+
+  static final List<ProductModel> biscuit = [
+    ProductModel(
+      name: AppStrings.loacker,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.loacker,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.loacker,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.loacker2,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.biscoff,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.biscoff,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.tuc,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.tuc,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.tuc,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.tuc2,
+      id: uuid.v4(),
+    ),
+  ];
 
   static final List<ProductModel> detergent = [
     ProductModel(
@@ -129,6 +170,27 @@ class ProductModel extends Equatable {
       rate: '4.5 (255)',
       price: 20.0,
       image: AppImages.guava,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.mango,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.mango,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.waterLemon,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.waterLemon,
+      id: uuid.v4(),
+    ),
+    ProductModel(
+      name: AppStrings.grapes,
+      rate: '4.5 (255)',
+      price: 20.0,
+      image: AppImages.grapes,
       id: uuid.v4(),
     ),
   ];
